@@ -4,6 +4,8 @@ import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.time.temporal.ChronoUnit;
 
+import model.exceptions.DomainException;
+
 public class Reservation {
 
 	private Integer roomNumber;
@@ -13,7 +15,9 @@ public class Reservation {
 	private static DateTimeFormatter fmt = DateTimeFormatter.ofPattern("dd/MM/yyyy");
 
 	public Reservation(Integer roomNumber, LocalDate checkIn, LocalDate checkOut) {
-
+		if (!checkOut.isAfter(checkIn)) {
+			throw new DomainException("Check-out date must be after check-in date");
+		}
 		this.roomNumber = roomNumber;
 		this.checkIn = checkIn;
 		this.checkOut = checkOut;
@@ -39,28 +43,27 @@ public class Reservation {
 		return ChronoUnit.DAYS.between(checkIn, checkOut);
 	}
 
-	public String updateDates(LocalDate checkIn, LocalDate checkOut) {
+	public void updateDates(LocalDate checkIn, LocalDate checkOut) {
 		LocalDate now = LocalDate.now();
-        if (checkIn.isBefore(now) || checkOut.isBefore(now)) {
-            return " Reservation dates for update must be future dates";
-        } else if (!checkOut.isAfter(checkIn)) {
-            return "Check-out date must be after check-in date";
-        } 
-	
+		if (checkIn.isBefore(now) || checkOut.isBefore(now)) {
+			throw new DomainException("Reservation dates for update must be future dates");
+		} else if (!checkOut.isAfter(checkIn)) {
+			throw new DomainException("Check-out date must be after check-in date");
+		}
+
 		this.checkIn = checkIn;
 		this.checkOut = checkOut;
-	   return null;
+
 	}
+
 	@Override
-	public String toString(){
-		return "Room "
-				+roomNumber
-				+", check-in: "
-				+checkIn.format(fmt)
-		        +",check-out: "
-		        +checkOut.format(fmt)
-		        +","
-		        +duration()
-		        +" nights";
+	public String toString() {
+		return "Room " + roomNumber 
+				+ ", check-in: " 
+				+ checkIn.format(fmt) 
+				+ ",check-out: "
+				+ checkOut.format(fmt) 
+				+ ","
+				+ duration() + " nights";
 	}
 }
